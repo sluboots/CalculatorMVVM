@@ -187,6 +187,27 @@ namespace Calc
 
         }
 
+        private ICommand _pointButtonCommand;
+        public ICommand PointButtonCommand
+        {
+            get
+            {
+                return _pointButtonCommand ??= new RelayCommand(PointButton);
+            }
+        }
+
+        public void PointButton()
+        {
+            if(Expression != string.Empty)
+            {
+                string[] exp = Expression.Split(' ');
+                if(!exp[^1].Contains("."))
+                {
+                    Expression += ".";
+                }
+            }
+        }
+
         private ICommand _memorySave;
         public ICommand MemorySave
         {
