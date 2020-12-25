@@ -18,6 +18,10 @@ namespace Calc.Models
         }
         public static string Calculate(string expression)
         {
+            if(expression[^1] == ' ')
+            {
+                expression += '0';
+            }
             ReadOnlyDictionary<string, int> prec = new ReadOnlyDictionary<string, int>(
                 new Dictionary<string, int>
                 {
@@ -26,11 +30,11 @@ namespace Calc.Models
                     {"+", 2},
                     {"-", 2},
                     {"(", 1},
+                    {")", 1},
                 });
             Stack<string> operations = new Stack<string>();
             string[] exp = expression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             expression = string.Empty;
-            string topToken;
 
             foreach (var item in exp)
             {
@@ -42,18 +46,20 @@ namespace Calc.Models
                 {
                     operations.Push(item);
                 }
-                else if(item == ")")
+                else if (item == ")")
                 {
-                    topToken = operations.Pop();
-                    while(topToken != "(")
+                    while (operations.Peek() != "(")
                     {
-                        expression += topToken;
-                        topToken = operations.Pop();
+                        expression += $"{operations.Pop()} ";
+                    }
+                    if (operations.Peek() == "(")
+                    {
+                        operations.Pop();
                     }
                 }
                 else if (prec.ContainsKey(item))
                 {
-                    if(!operations.Count.Equals(0) && prec[item] <= prec[operations.Peek()])
+                    if (!operations.Count.Equals(0) && prec[item] <= prec[operations.Peek()])
                     {
                         expression += $"{operations.Pop()} ";
                     }
@@ -107,19 +113,6 @@ namespace Calc.Models
                 return (decimal.Parse(op1, NumberStyles.Float, new CultureInfo("en-US")) -
                                               decimal.Parse(op2, NumberStyles.Float, new CultureInfo("en-US"))).ToString("G29", new CultureInfo("en-US"));
             }
-        }
-
-        public static string NormalForm(string expression)
-        {
-            for (int i = 0; i < expression.Length; i++)
-            {
-                if (expression[i] == '.')
-                {
-
-                }
-            }
-
-            return expression;
         }
 
     }

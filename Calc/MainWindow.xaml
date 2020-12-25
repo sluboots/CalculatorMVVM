@@ -7,7 +7,7 @@
     xmlns:local="clr-namespace:Calc"
     d:DataContext="{d:DesignInstance Type=local:CalcViewModel}"
     mc:Ignorable="d"
-    Title ="Калькулятор" Height="310" Width="550"
+    Title ="Калькулятор" Height="340" Width="550"
     TextOptions.TextRenderingMode="ClearType" WindowStyle="ThreeDBorderWindow" Background="#676767">
     <Window.Resources>
         <ControlTemplate x:Key="Button_Template" TargetType="{x:Type Button}">
@@ -65,6 +65,7 @@
                 <RowDefinition Height="36" />
                 <RowDefinition Height="36" />
                 <RowDefinition Height="36" />
+                <RowDefinition Height="36" />
 
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -102,6 +103,9 @@
             <Button Grid.Column="0" Grid.Row="6" Content="." CommandParameter="." Command="{Binding PointButtonCommand}" Template="{Binding Source={StaticResource ResourceKey=Button_Template}}"/>
             <Button Grid.Column="1" Grid.Row="6" Content="0" CommandParameter="0" Command="{Binding DigitButtonCommand}" Template="{Binding Source={StaticResource ResourceKey=Button_Template}}"/>
             <Button Grid.Column="2" Grid.Row="6" Content="+/-" Command="{Binding ActionButtonCommand}" Template="{Binding Source={StaticResource ResourceKey=Button_Template}}"/>
+
+            <Button Grid.Column="0" Grid.Row="7" Content="(" CommandParameter="(" Command="{Binding BracketButtonCommand}" Template="{Binding Source={StaticResource ResourceKey=Button_Template}}"/>
+            <Button Grid.Column="1" Grid.Row="7" Content=")" CommandParameter=")" Command="{Binding BracketButtonCommand}" Template="{Binding Source={StaticResource ResourceKey=Button_Template}}"/>
 
 
             <ScrollViewer Grid.Column="0" Grid.ColumnSpan="4" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">

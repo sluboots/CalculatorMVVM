@@ -98,6 +98,20 @@ namespace Calc
             }
         }
 
+        private int _bracketsCount;
+        public int BracketsCount
+        {
+            get
+            {
+             return _bracketsCount;
+            }
+            set
+            {
+                _bracketsCount = value;
+                OnPropertyChange(nameof(BracketsCount));
+            }
+        }
+
         public JournalCollectionDB Journal
         {
             set;
@@ -159,6 +173,12 @@ namespace Calc
             switch (operation)
             {
                 case "=":
+                    while (BracketsCount > 0)
+                    {
+                        Expression += " )";
+                        BracketsCount--;
+                    }
+
                     Result = CalcModel.Calculate(Expression);
                     Expression = $"{Expression} = {Result}";
                     Journal.Add(new JournalItem(Expression));
@@ -228,11 +248,53 @@ namespace Calc
             if(Expression != string.Empty)
             {
                 string[] exp = Expression.Split(' ');
+                if(exp[^1] == " ")
+                {
+                    Expression += "0.";
+                }
                 if(!exp[^1].Contains("."))
                 {
                     Expression += ".";
                 }
             }
+        }
+
+        private ICommand _bracketButtonCommand;
+        public ICommand BracketButtonCommand
+        {
+            get
+            {
+                return _bracketButtonCommand ??= new RelayCommand<string>(BracketButton, bracket => true);
+            }
+        }
+
+        public void BracketButton(string bracket)
+        {
+            switch (bracket)
+            {
+                case "(":
+                    if (LastOperation == "=")
+                    {
+                        Expression = string.Empty;
+                    }
+                    if (BracketsCount < 25 && LastOperation != "BracketClose")
+                    {
+                        Expression += "( ";
+
+                        BracketsCount++;
+                        LastOperation = "BracketOpen";
+                    }
+                    break;
+                case ")":
+                    if (BracketsCount > 0)
+                    {
+                        Expression += " )";
+                        BracketsCount--;
+                        LastOperation = "BracketClose";
+                    }
+                    break;
+            }
+
         }
 
         private ICommand _memorySave;
