@@ -162,10 +162,29 @@ namespace Calc
                     Result = CalcModel.Calculate(Expression);
                     Expression = $"{Expression} = {Result}";
                     Journal.Add(new JournalItem(Expression));
+                    Expression = $"{Result}";
                     break;
                 default:
-                    Expression += $" {operation} ";
-                    break;
+                    if (Expression == string.Empty)
+                    {
+                        break;
+                    }
+                    else if(Expression.Length == 1)
+                    {
+                        Expression += $" {operation} ";
+                        break;
+                    }
+                    else if (Expression[^2] == '+' || Expression[^2] == '/' || Expression[^2] == '*' || Expression[^2] == '-')
+                    {
+                        Expression = Expression.Remove(Expression.Length-2, 2);
+                        Expression += $"{operation} ";
+                        break;
+                    }
+                    else
+                    {
+                        Expression += $" {operation} ";
+                        break;
+                    }
             }
             LastOperation = $"{operation}";
         }
@@ -181,9 +200,17 @@ namespace Calc
         public void ClearButton(string x)
         {
             if (x == "C")
+            {
                 Expression = "0";
+                LastOperation = "";
+            }
+                
             else if (x == "CE")
+            {
                 Expression = "0";
+                LastOperation = "";
+
+            }
 
         }
 

@@ -41,7 +41,7 @@
         <KeyBinding Key="NumPad0"  Command="{Binding DigitButtonCommand}" CommandParameter="0"/>
 
         <KeyBinding Command="{Binding OperationButtonCommand}" CommandParameter="+" Key="Add"/>
-        <KeyBinding Command="{Binding OperationButtonCommand}" CommandParameter="–" Key="Subtract"/>
+        <KeyBinding Command="{Binding OperationButtonCommand}" CommandParameter="-" Key="Subtract"/>
         <KeyBinding Command="{Binding OperationButtonCommand}" CommandParameter="*" Key="Multiply"/>
         <KeyBinding Command="{Binding OperationButtonCommand}" CommandParameter="/" Key="Divide"/>
         <KeyBinding Command="{Binding OperationButtonCommand}" CommandParameter="=" Key="Enter"/>
@@ -126,7 +126,7 @@
                     <ItemsControl ItemsSource="{Binding Journal.Collection}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Expression}" TextAlignment="Right"/>
+                                <TextBlock Text="{Binding Expression}" TextAlignment="Right" Background="AliceBlue" Foreground="Black" Margin="0 5 0 0" TextWrapping="Wrap"/>
                                
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -138,7 +138,7 @@
                     <ItemsControl ItemsSource="{Binding Memory.Collection}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Result}" TextAlignment="Right"/>
+                                <TextBlock Text="{Binding Result}" TextAlignment="Right" Background="AliceBlue" Foreground="Black" Margin="0 5 0 0"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                         </ItemsControl>
