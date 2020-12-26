@@ -154,11 +154,10 @@ namespace Calc
         }
         public void DigitButton(string digit)
         {
-            string State;
+            
             if (Expression == "0")
             {
                 Expression = $"{digit}";
-                State = "Zero";
             }
             else if(Expression.Contains("("))
             {
