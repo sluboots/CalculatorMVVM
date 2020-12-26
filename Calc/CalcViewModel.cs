@@ -154,28 +154,37 @@ namespace Calc
         }
         public void DigitButton(string digit)
         {
+            string State;
             if (Expression == "0")
             {
-                Expression = $"{digit} ";
+                Expression = $"{digit}";
+                State = "Zero";
             }
-            else
+            else if(Expression.Contains("("))
             {
-                var exp = Expression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if(exp[^1] == "0")
+               var exp = Expression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (exp[^1] == "0" && exp[^2] == " ")
+                {
+                    Expression = Expression.Remove(Expression.Length - 1);
+                    Expression += $" {digit}";
+                }
+                else if(exp[^1] == "0")
                 {
                     Expression = Expression.Remove(Expression.Length - 2);
-                    Expression += $"{digit}";
+                    Expression += $" {digit}";
                 }
+                
                 else if (decimal.TryParse(exp[^1], out _))
                 {
-                    
-                    Expression = Expression.Remove(Expression.Length - 1);
-                    Expression += $"{digit} ";
-
+                    //Expression = Expression.Remove(Expression.Length - 1);
+                    Expression += $"{digit}";
                 }
-                //Expression += $"{digit}";
+                else
+                    Expression += $"{digit}";
             }
-            
+            else
+                Expression += $"{digit}";
+
         }
 
         private ICommand _operationButtonCommand;
