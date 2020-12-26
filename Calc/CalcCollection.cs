@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Data.SQLite;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using Dapper;
 
 namespace Calc
@@ -71,6 +72,216 @@ namespace Calc
                 _result = value;
                 OnPropertyChange(nameof(Result));
             }
+        }
+    }
+
+    class JournalCollectionTxt
+    {
+        private string FileName
+        {
+            get;
+        }
+        public ObservableCollection<JournalItem> Collection
+        {
+            get;
+            set;
+        }
+
+
+        public JournalCollectionTxt(string fileName)
+        {
+            FileName = fileName + ".txt";
+            Collection = new ObservableCollection<JournalItem>();
+
+            if (!File.Exists(FileName))
+            {
+                File.Create(FileName);
+            }
+        }
+        public bool TryLoad()
+        {
+            try
+            {
+                string[] text = File.ReadAllText(FileName).Split('\n');
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public ObservableCollection<JournalItem> Load()
+        {
+            string[] text = File.ReadAllText(FileName).Split('\n');
+            ObservableCollection<JournalItem> collection = new ObservableCollection<JournalItem>();
+
+            foreach (string journalItemTxt in text)
+            {
+                if (journalItemTxt != string.Empty)
+                {
+                    JournalItem journalItem = new JournalItem();
+                    try
+                    {
+                        string[] textSplit = journalItemTxt.Split(":");
+
+                        journalItem.Id = textSplit[1];
+                        journalItem.Expression = textSplit[2];
+                        collection.Add(journalItem);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                
+                }
+            }
+            for (int i = 0; i < collection.Count; i++)
+            {
+                collection[i].Id = (collection.Count - i).ToString();
+            }
+
+            return collection;
+        }
+        private void Update()
+        {
+            string text = string.Empty;
+            foreach (JournalItem journalItem in Collection)
+            {
+                text += $"{journalItem.Id}:{journalItem.Expression}\n";
+            }
+
+            File.WriteAllText(FileName, text);
+        }
+        public void Add(JournalItem item)
+        {
+            Collection.Insert(0, item);
+            item.Id = Collection.Count.ToString();
+
+            Update();
+        }
+        public void Remove(JournalItem item)
+        {
+            Collection.Remove(item);
+            for (int i = 0; i < Collection.Count; i++)
+            {
+                Collection[i].Id = (Collection.Count - i).ToString();
+            }
+
+            Update();
+        }
+        public void Clear()
+        {
+            Collection.Clear();
+
+            Update();
+        }
+    }
+    class MemoryCollectionTxt
+    {
+        private string FileName
+        {
+            get;
+        }
+        public ObservableCollection<MemoryItem> Collection
+        {
+            get;
+            set;
+        }
+
+
+        public MemoryCollectionTxt(string fileName)
+        {
+            FileName = fileName + ".txt";
+            Collection = new ObservableCollection<MemoryItem>();
+
+            if (!File.Exists(FileName))
+            {
+                File.Create(FileName);
+            }
+        }
+        public bool TryLoad()
+        {
+            try
+            {
+                string[] text = File.ReadAllText(FileName).Split('\n');
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public ObservableCollection<MemoryItem> Load()
+        {
+            string[] text = File.ReadAllText(FileName).Split('\n');
+            ObservableCollection<MemoryItem> collection = new ObservableCollection<MemoryItem>();
+
+            foreach (string journalItemTxt in text)
+            {
+                if (journalItemTxt != string.Empty)
+                {
+                    MemoryItem memoryItem = new MemoryItem();
+                    try
+                    {
+                        string[] textSplit = journalItemTxt.Split(":");
+
+                        memoryItem.Id = textSplit[1];
+                        memoryItem.Result = textSplit[2];
+                        collection.Add(memoryItem);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                
+                }
+            }
+            for (int i = 0; i < collection.Count; i++)
+            {
+                collection[i].Id = (collection.Count - i).ToString();
+            }
+
+            return collection;
+        }
+        private void Update()
+        {
+            string text = string.Empty;
+            foreach (MemoryItem memoryItem in Collection)
+            {
+                text += $"{memoryItem.Id}:{memoryItem.Result}\n";
+            }
+
+            File.WriteAllText(FileName, text);
+        }
+        public void Add(MemoryItem item)
+        {
+            Collection.Insert(0, item);
+            item.Id = Collection.Count.ToString();
+
+            Update();
+        }
+        public void Remove(MemoryItem item)
+        {
+            Collection.Remove(item);
+            for (int i = 0; i < Collection.Count; i++)
+            {
+                Collection[i].Id = (Collection.Count - i).ToString();
+            }
+
+            Update();
+        }
+        public void Clear()
+        {
+            Collection.Clear();
+
+            Update();
+        }
+        public void ChangeValue(string newValue)
+        {
+            Collection[0].Result = newValue;
+            Update();
         }
     }
 

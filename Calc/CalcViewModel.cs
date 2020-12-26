@@ -40,11 +40,11 @@ namespace Calc
                 {
                     case nameof(Expression):
 
-                        if(Expression == string.Empty)
+                        if (Expression == string.Empty)
                         {
                             error = "Empty";
                         }
-                        else if(Expression.Length > 2 && (Expression[^2] == '+' || Expression[^2] == '-' || Expression[^2] == '*' || Expression[^2] == '/'))
+                        else if (Expression.Length > 2 && (Expression[^2] == '+' || Expression[^2] == '-' || Expression[^2] == '*' || Expression[^2] == '/'))
                         {
                             error = "Not correct";
                         }
@@ -103,7 +103,7 @@ namespace Calc
         {
             get
             {
-             return _bracketsCount;
+                return _bracketsCount;
             }
             set
             {
@@ -112,28 +112,36 @@ namespace Calc
             }
         }
 
-        public JournalCollectionDB Journal
+        public JournalCollectionTxt Journal
         {
             set;
             get;
         }
 
-        public MemoryCollectionDB Memory
+        public MemoryCollectionTxt Memory
         {
             set;
             get;
         }
+
+      
 
         public CalcViewModel()
         {
             Expression = "0";
             Result = string.Empty;
+            LastOperation = "=";
 
-            Journal = new JournalCollectionDB();
-            Journal.Collection = Journal.Load();
-            Memory = new MemoryCollectionDB();
-            Memory.Collection = Memory.Load();
-            
+            Journal = new JournalCollectionTxt("Journal");
+            if(Journal.TryLoad())
+            {
+                Journal.Collection = Journal.Load();
+            }
+            Memory = new MemoryCollectionTxt("Memory");
+            if (Memory.TryLoad())
+            {
+                Memory.Collection = Memory.Load();
+            }
         }
 
         private ICommand _digitButtonCommand;
@@ -147,13 +155,27 @@ namespace Calc
         public void DigitButton(string digit)
         {
             if (Expression == "0")
-            { 
-                Expression = digit;
+            {
+                Expression = $"{digit} ";
             }
             else
             {
-                Expression += digit;
+                var exp = Expression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if(exp[^1] == "0")
+                {
+                    Expression = Expression.Remove(Expression.Length - 2);
+                    Expression += $"{digit}";
+                }
+                else if (decimal.TryParse(exp[^1], out _))
+                {
+                    
+                    Expression = Expression.Remove(Expression.Length - 1);
+                    Expression += $"{digit} ";
+
+                }
+                //Expression += $"{digit}";
             }
+            
         }
 
         private ICommand _operationButtonCommand;
@@ -166,10 +188,7 @@ namespace Calc
         }
         public void OperationButton(string operation)
         {
-            if (LastOperation == "=")
-            {
-                Expression = Result;
-            }
+            
             switch (operation)
             {
                 case "=":
@@ -189,14 +208,14 @@ namespace Calc
                     {
                         break;
                     }
-                    else if(Expression.Length == 1)
+                    else if (Expression.Length == 1)
                     {
                         Expression += $" {operation} ";
                         break;
                     }
                     else if (Expression[^2] == '+' || Expression[^2] == '/' || Expression[^2] == '*' || Expression[^2] == '-')
                     {
-                        Expression = Expression.Remove(Expression.Length-2, 2);
+                        Expression = Expression.Remove(Expression.Length - 2, 2);
                         Expression += $"{operation} ";
                         break;
                     }
@@ -223,12 +242,14 @@ namespace Calc
             {
                 Expression = "0";
                 LastOperation = "";
+                BracketsCount = 0;
             }
-                
+
             else if (x == "CE")
             {
                 Expression = "0";
                 LastOperation = "";
+                BracketsCount = 0;
 
             }
 
@@ -245,14 +266,14 @@ namespace Calc
 
         public void PointButton()
         {
-            if(Expression != string.Empty)
+            if (Expression != string.Empty)
             {
                 string[] exp = Expression.Split(' ');
-                if(exp[^1] == " ")
+                if (exp[^1] == " ")
                 {
                     Expression += "0.";
                 }
-                if(!exp[^1].Contains("."))
+                if (!exp[^1].Contains("."))
                 {
                     Expression += ".";
                 }
@@ -270,20 +291,38 @@ namespace Calc
 
         public void BracketButton(string bracket)
         {
+
             switch (bracket)
             {
                 case "(":
-                    if (LastOperation == "=")
+                    var exp = Expression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (decimal.TryParse(exp[^1], out _))
                     {
+                        //exp[^2] = bracket;
+                        var tmp = exp[^1];
+                        exp[^1] = bracket;
+                        exp = exp.Append(tmp).ToArray();
+
                         Expression = string.Empty;
+                        foreach (var item in exp)
+                        {
+                            Expression += $"{item} ";
+                        }
+                        BracketsCount++;
+                        LastOperation = "BracketOpen";
                     }
-                    if (BracketsCount < 25 && LastOperation != "BracketClose")
+                    else if (BracketsCount < 25 && LastOperation != "BracketClose")
                     {
                         Expression += "( ";
 
                         BracketsCount++;
                         LastOperation = "BracketOpen";
                     }
+                    if (LastOperation == "=")
+                    {
+                        Expression = string.Empty;
+                    }
+                    
                     break;
                 case ")":
                     if (BracketsCount > 0)
@@ -316,7 +355,7 @@ namespace Calc
         {
             get
             {
-                return _memoryDecrease ??= new RelayCommand(MemoryDecreaseButton, () => Memory.Collection.Count != 0 );
+                return _memoryDecrease ??= new RelayCommand(MemoryDecreaseButton, () => Memory.Collection.Count != 0);
             }
         }
         public void MemoryDecreaseButton()
@@ -336,7 +375,7 @@ namespace Calc
         public void MemoryIncreaseButton()
         {
             Memory.ChangeValue(CalcModel.Calculate($"{Memory.Collection[0].Result} + {Expression}"));
-            
+
         }
 
         private ICommand _memoryRecall;
